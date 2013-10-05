@@ -115,23 +115,9 @@ gl control ///
 											// The description in each regression do file.	
 	}
 	
-
-/*
-    //  TEST OVER TAXES
-      //  do DoFiles/TEST_DDonTaxes
-      //  stop
-
-    // Regressions
-    do DoFiles/prueba
-     // do DoFiles/130710DurationAnalysisRegsPoli    // Lineal Control function
-    // do DoFiles/130710DurationAnalysispruebaLineal   // Run a lineal regression to check 
-     do DoFiles/130710DurationAnalysispruebaProbit   // Run a lineal regression to check 
-//stop
-    do DoFiles/130710DurationAnalysispruebaCloglog   // Run a lineal regression to check 
-
-    
+   
     // drop instrument variables 
-                drop firstVar - lastVar 
+    cap drop firstVar - lastVar 
         
 */    
 cap log close
