@@ -2,7 +2,7 @@
     //			Working on DHS
     //			Duration Model
     //			First Version 	: 130710
-    //          Last modify 	: 130930
+    //          Last modify 	: 131005
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +27,8 @@ cap cd "/Volumes/MY WORK/PhD Papers/Fertility decision during conflict/DataAnaly
 		I got it from the file 130710DurationAnalysisShell.do, for previous
 		description and changes see the description of that file.
    
- 
+	:::: update 131005 -> Insert the macros to be able to run the 
+						conditional regressions 
  */
 
     
@@ -45,6 +46,7 @@ loc dep     $DEPVAR
 loc reps    $BSREPS
 loc prefix 	$PREFIX 
 loc esp		$ESP
+loc cond 	$COND
 
 loc inF "DataFiles/Working/"
 loc inF1 "DataFiles/Working/MapsData/120922/"
@@ -52,7 +54,7 @@ loc doFld "DoFiles/JobMarketRuns/"
 
 ////////
 cap log close
-log using LogFiles/`prefix'Drt`dep'`lA'`uA'on`fNum'`ageOn'InstSet`set'poli`poli'esp`esp'BS`reps'.log, replace
+log using LogFiles/`prefix'Drt`dep'_`cond'`lA'`uA'on`fNum'`ageOn'InstSet`set'poli`poli'esp`esp'BS`reps'.log, replace
 
 // 1. Declare the paramenters of this run
 
