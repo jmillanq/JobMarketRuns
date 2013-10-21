@@ -2,7 +2,7 @@
     //			Working on DHS
     //			Duration Model
     //			First Version 	: 130710
-    //          Last modify 	: 131005
+    //          Last modify 	: 131020
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +47,7 @@ loc reps    $BSREPS
 loc prefix 	$PREFIX 
 loc esp		$ESP
 loc cond 	$COND
+loc intVar 	$INTER
 
 loc inF "DataFiles/Working/"
 loc inF1 "DataFiles/Working/MapsData/120922/"
@@ -54,7 +55,7 @@ loc doFld "DoFiles/JobMarketRuns/"
 
 ////////
 cap log close
-log using LogFiles/`prefix'Drt`dep'_`cond'`lA'`uA'on`fNum'`ageOn'InstSet`set'poli`poli'esp`esp'BS`reps'.log, replace
+log using LogFiles/`prefix'Drt`dep'`lA'`uA'on`fNum'`ageOn'Int`intVar'InstSet`set'poli`poli'esp`esp'BS`reps'.log, replace
 
 // 1. Declare the paramenters of this run
 
@@ -70,7 +71,7 @@ gl  POLI    `poli'                  // Control Function polinomiom degree
 gl  BSR     `reps'                  // Bootstrap repetitions
 
 gl control ///
-    "c_* lfCens DHS_* yb_* urban etnia_* lPop wealth_* v136 *Dead mCoca mpioFamilias dptoGDPpk y_* mpio_*"    
+    "i.Traf mCoca lPop uribe chavez mpioFamilias dptoGDPpk lfCens DHS_* yb_* urban etnia_* lPop wealth_* v136 *Dead y_* mpio_*"    
             
 
 
@@ -96,19 +97,19 @@ gl control ///
 
 
     // Data Set up
-    do `doFld'130620DurationRenameHomicides 	// Rename the homicide variables
-    do `doFld'130620DurationMergeIndVars 		// Women control vars
-    do `doFld'130710DurationMergeMpioVars		// Municipality data
-    do `doFld'130620DurationJenkins2005   		// Jenkins 2005 (Discrete time duration model)
+    qui do `doFld'130620DurationRenameHomicides 	// Rename the homicide variables
+    qui do `doFld'130620DurationMergeIndVars 		// Women control vars
+    qui do `doFld'130710DurationMergeMpioVars		// Municipality data
+    qui do `doFld'130620DurationJenkins2005   		// Jenkins 2005 (Discrete time duration model)
     destring codemun, g(mun)					// I need this to run the Bootstrap    
         replace $depVar = . if $depVar == 2 | $depVar == -99  
         drop if $depVar == .    // Dropping the observations after first pregnancy or outside sample
 
-    do `doFld'130710DurationCreateInstrument   // Merge and create the vars for the instrument
+    qui do `doFld'130710DurationCreateInstrument   // Merge and create the vars for the instrument
 
 
 // 3. Run the estimations
-
+	g uno = 1 		// if I use uno as conditional is the same of unconditional.
 	foreach var in homRateTotal0 {
 		gl VIOVAR `var'	
 		do `doFld'DurationRegs_`esp'		// Running the model depending on the specification

@@ -1,15 +1,12 @@
-
 /* 
+	Description:
 	This is a support file for the DurationAnalysis set.
-	First Version	:	131006
-	Last Modify		:	131019
+	First Version	:	131020
+	Last Modify		:	131020
 
-		In this Do file I run the logistic discrete duration model condition
-		the outcome variable to another time related event.
-
-			e.g. 	I can run in this file the duration model of pregnancy conditional 
-					on being married.
-
+		In this Do file I run the logistic discrete duration model 
+		interacting the violence variable with the wealth status of
+		the household.
 */
  
 // Import macros
@@ -27,7 +24,7 @@
 	loc prefix $PREFIX
 
 // Titles 
-	loc tableTitle "`yVar' from `lAgeOn' to `uAgeOn' on `vioVar' - Violence and parents mortality"
+	loc tableTitle "`yVar' from `lAgeOn' to `uAgeOn' on `vioVar' - Violence and Wealth status"
 
 // Period of analysis
     su year if `vioVar'  != .
@@ -114,15 +111,11 @@ cap est clear
     zscore `vioVar' if `ageCond' & `yearCond'
     ren z_`vioVar' zHom
     
-// Gen interaction parentsDead*zHom
-	cap drop zHom_D*
-    foreach x in mother father parents {
-        g zHom_D`x' = zHom*`x'Dead        
+// Gen interaction wealth*zHom
+	cap drop zHom_W*
+    forv x = 1/5 {
+        g zHom_W`x' = zHom*wealth_`x'        
 	}
-loc esp1 "zHom_D*"
-loc esp2 "zHom_Dmother"
-loc esp3 "zHom_Dfather"
-loc esp4 "zHom_Dparents"
 
 
 // First Stage - Vio = Drug Traffic
@@ -143,18 +136,11 @@ loc esp4 "zHom_Dparents"
     des ControlF*, varlist
 	loc ControlList = r(varlist)
 
-
-forv mod = 1/4 {    
-	eststo SS_`mod': ///
-    	logit `yVar' zHom `esp`mod'' ControlF* `dur1' $control ///
+ 
+	eststo SS: ///
+    	logit `yVar' zHom zHom_W* ControlF* `dur1' $control ///
         [pw = awtvar] if  `ageCond' & `yearCond' , cluster(codemun) iter(100) 
     
-	// Test over the sum with the interaction
-		foreach int in mother father parents {
-			cap n test zHom + zHom_D`int' = 0
-			cap n estadd scalar tot`int' = _b[zHom] + _b[zHom_D`int']
-			cap n estadd scalar Chi2`int' = r(chi2)
-		}
 	
 	// N individuals
 		cap drop id
@@ -163,22 +149,23 @@ forv mod = 1/4 {
         	sum id
 		estadd scalar Ind = r(max)
 		estadd scalar M = `Mpios'
+		estadd scalar F_Instr = `F_Instr'
 		
 	// Test over Control Function  
         test `ControlList'
         loc ControlTest = r(chi2)
         estadd scalar CTest = `ControlTest' 
                     
-}
+
 
 
 // Publish
 foreach out in csv tex {
-	esttab SS_* using ///
+	esttab SS using ///
 	LatexFiles/`prefix'Drt`dep'`lA'`uA'on`vioVar'DT`set'poli`cfpoli'ParentsMort.`out' ///
-	, r `esttabOpt'  keep(zHom zHom_D* *Dead ControlF*) ///
-	s(totmother Chi2mother totfather Chi2father totparents Chi2parents CTest r2_p M Ind N, ///
-	fmt(2 2 2 2 2 2 2 2 0 0 0)) ///
+	, r `esttabOpt'  keep(zHom zHom_W* wealth_* ControlF*) ///
+	s(F_Instr CTest r2_p M Ind N, ///
+	fmt(2 2 2 0 0 0)) ///
 	addnotes( ///
 		"Duration var : `labelY'" ///
 		"Conditional on : `condVar'" ///
